@@ -1,22 +1,61 @@
 const express = require("express");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const User = require(__dirname + "/User");
 const app = express();
 
 app.use(express.static(__dirname + "/public"));
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 
+async function connectMongoDB(){
+    await mongoose.connect('mongodb://127.0.0.1:27017/loginDataDB');
+}
+
+connectMongoDB();
+
 app.get("/", function(req, res){
     res.render("home");
 });
 
-app.get("/login", function(req, res){
+app.route("/login")
+
+.get(function(req, res){
     res.render("login");
+})
+.post(async function(req, res){
+    const username = req.body.username;
+    const password = req.body.password;
+
+    try {
+        const existingUser = await User.findOne({username: username});
+        if (existingUser.password === password){
+            res.render("secrets");
+        } else {
+            res.redirect("/login");
+        }
+    } catch (error) {
+        res.render(error.message);
+    }
+
 });
 
-app.get("/register", function(req, res){
+app.route("/register")
+
+.get(function(req, res){
     res.render("register");
+})
+
+.post(async function(req, res){
+    try {
+        const newUser = await User.create({
+            username: req.body.username,
+            password: req.body.password
+        })
+        res.render("secrets");
+    } catch (error) {
+        res.send(error.message);
+    }   
 });
 
 
