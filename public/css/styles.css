@@ -1,0 +1,25 @@
+
+body {
+    color: whitesmoke;
+}
+
+.centered {
+    padding-top: 200px;
+    text-align: center;
+}
+
+.secret-text {
+  text-align: center;
+  font-size: 2rem;
+  color: #fff;
+  background-color: #000;
+}
+
+.login-container{
+  max-width: 420px;
+
+}
+
+.card-body{
+  color: black;
+}
