@@ -29,11 +29,19 @@ app.route("/login")
 
     try {
         const existingUser = await User.findOne({username: username});
-        if (existingUser.password === password){
-            res.render("secrets");
-        } else {
-            res.redirect("/login");
+        if (existingUser === null) {
+            res.status(400).send("User not found");
+
+        } else{
+
+            if(existingUser.checkPasswordValidity(password)){
+                res.render("secrets");
+            } 
+            else{
+                res.status(400).send("Wrong password");
+            }
         }
+
     } catch (error) {
         res.render(error.message);
     }
@@ -48,11 +56,15 @@ app.route("/register")
 
 .post(async function(req, res){
     try {
-        const newUser = await User.create({
+        const newUser = new User({
             username: req.body.username,
             password: req.body.password
         })
+
+        newUser.setPassword();
+        await newUser.save();
         res.render("secrets");
+        
     } catch (error) {
         res.send(error.message);
     }   
