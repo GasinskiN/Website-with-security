@@ -1,6 +1,7 @@
 const express = require("express");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 const User = require(__dirname + "/User");
 const app = express();
 
@@ -25,7 +26,7 @@ app.route("/login")
 })
 .post(async function(req, res){
     const username = req.body.username;
-    const password = req.body.password;
+    const plainTextPassword = req.body.password;
 
     try {
         const existingUser = await User.findOne({username: username});
@@ -33,13 +34,14 @@ app.route("/login")
             res.status(400).send("User not found");
 
         } else{
-
-            if(existingUser.checkPasswordValidity(password)){
-                res.render("secrets");
-            } 
-            else{
-                res.status(400).send("Wrong password");
-            }
+            bcrypt.compare(plainTextPassword, existingUser.password, function(err, isPasswordTheSame) {
+                if(isPasswordTheSame){
+                    res.render("secrets");
+                } 
+                else{
+                    res.status(400).send("Wrong password");
+                }
+            });
         }
 
     } catch (error) {
@@ -56,15 +58,17 @@ app.route("/register")
 
 .post(async function(req, res){
     try {
-        const newUser = new User({
-            username: req.body.username,
-            password: req.body.password
-        })
+        bcrypt.hash(req.body.password, 11, async function(err, hash){
+            if(!err){
+            const newUser = new User({username: req.body.username})
+            newUser.password = hash;
+            await newUser.save();
+            res.render("secrets");
+            } else {
+                console.log(err);
+            }
+        });
 
-        newUser.setPassword();
-        await newUser.save();
-        res.render("secrets");
-        
     } catch (error) {
         res.send(error.message);
     }   
