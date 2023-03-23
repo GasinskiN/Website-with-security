@@ -23,3 +23,7 @@ body {
 .card-body{
   color: black;
 }
+
+.secret-form{
+  display: inline-block;
+}
