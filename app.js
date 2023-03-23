@@ -65,13 +65,24 @@ app.route("/register")
     })
 });
 
+
+app.post("/logout", function(req, res){
+    req.logout(function(err){
+        if (err){
+            console.log(err);
+        } 
+        res.redirect("/");
+    });
+});
+
 app.get("/secrets", function(req, res){
     if (req.isAuthenticated()){
         res.render("secrets");
     } else {
         res.redirect("/login");
     }
-})
+});
+
 
 app.listen(3000, function(){
     console.log("Server running on port 3000");
