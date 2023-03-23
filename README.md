@@ -3,7 +3,6 @@ This is a node.js app
 
 This is a website where i am implementing different levels of security.
 
-
 First level was - plain text passwords (not very secure)
 Second level - encryption (better but still bad)
 third level - hashing algorithm sha 512 (pretty good but it is a fast algorithm so a dictionary attack is pretty easy)
