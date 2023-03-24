@@ -1,8 +1,10 @@
 const express = require("express");
 const ejs = require("ejs");
+require('dotenv').config();
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require(__dirname + "/User");
 const app = express();
 
@@ -15,7 +17,7 @@ app.use(session({
     resave: false, 
     saveUninitialized: false
 }));
-
+    
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -23,6 +25,31 @@ passport.use(User.createStrategy());
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/secrets"
+  },
+  async function(accessToken, refreshToken, profile, done) {
+      try {
+        const user = await User.findOne({ googleId: profile.id });
+        if(!user) {
+            const newUser = await User.create({
+                username: profile.displayName,
+                googleId: profile.id
+            })
+            return done(null, newUser);
+        } else {
+            return done(null, user);
+        }
+    } catch (error) {
+        return done(err);
+    }
+    }
+
+));
+
 
 async function connectMongoDB(){
     await mongoose.connect('mongodb://127.0.0.1:27017/loginDataDB');
@@ -32,6 +59,16 @@ connectMongoDB();
 
 app.get("/", function(req, res){
     res.render("home");
+});
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile'] }));
+
+app.get('/auth/google/secrets', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/secrets');
 });
 
 app.route("/login")
