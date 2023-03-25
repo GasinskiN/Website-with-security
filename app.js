@@ -1,3 +1,4 @@
+// require all necessary modules
 const express = require("express");
 const ejs = require("ejs");
 require('dotenv').config();
@@ -8,10 +9,12 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require(__dirname + "/User");
 const app = express();
 
+// configure express
 app.use(express.static(__dirname + "/public"));
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 
+// configure passport
 app.use(session({
     secret: "i am aware that a lot of",
     resave: false, 
@@ -26,6 +29,7 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// Oauth with google passport strategy
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -50,17 +54,19 @@ passport.use(new GoogleStrategy({
 
 ));
 
-
+// connect to mongoDB
 async function connectMongoDB(){
     await mongoose.connect('mongodb://127.0.0.1:27017/loginDataDB');
 }
 
 connectMongoDB();
 
+// home route
 app.get("/", function(req, res){
     res.render("home");
 });
 
+// google authenticatin routes
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile'] }));
 
@@ -71,6 +77,8 @@ app.get('/auth/google/secrets',
     res.redirect('/secrets');
 });
 
+
+// login route
 app.route("/login")
 
 .get(function(req, res){
@@ -83,6 +91,7 @@ app.route("/login")
 
 });
 
+// register route
 app.route("/register")
 
 .get(function(req, res){
@@ -102,6 +111,8 @@ app.route("/register")
     })
 });
 
+
+// Submit route
 app.route("/submit")
 
 .get(function(req, res){
@@ -128,7 +139,7 @@ app.route("/submit")
 });
 
 
-
+// logout 
 app.post("/logout", function(req, res){
     req.logout(function(err){
         if (err){
@@ -138,6 +149,7 @@ app.post("/logout", function(req, res){
     });
 });
 
+// secrets route
 app.get("/secrets", async function(req, res){
     if (req.isAuthenticated()){
         const users = await User.find({ secret: { $ne: null } });
@@ -152,7 +164,7 @@ app.get("/secrets", async function(req, res){
     }
 });
 
-
+// Turn on the server on port 3000
 app.listen(3000, function(){
     console.log("Server running on port 3000");
 });
