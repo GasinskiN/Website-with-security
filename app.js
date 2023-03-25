@@ -102,6 +102,32 @@ app.route("/register")
     })
 });
 
+app.route("/submit")
+
+.get(function(req, res){
+    if (req.isAuthenticated()) {
+        res.render("submit");
+    }
+    else {
+        res.redirect("/login");
+    }
+})
+
+.post(async function(req, res){
+    
+    const submittedSecret = req.body.secret;
+    try {
+        currentUser = await User.findById(req.user.id);
+        currentUser.secret = submittedSecret;
+        await currentUser.save();
+        res.redirect("secrets")
+    } catch (error) {
+        console.log(error.message);
+    }
+
+});
+
+
 
 app.post("/logout", function(req, res){
     req.logout(function(err){
@@ -112,9 +138,15 @@ app.post("/logout", function(req, res){
     });
 });
 
-app.get("/secrets", function(req, res){
+app.get("/secrets", async function(req, res){
     if (req.isAuthenticated()){
-        res.render("secrets");
+        const users = await User.find({ secret: { $ne: null } });
+        const usersSecrets = [];
+        users.forEach((el) => {
+            usersSecrets.push(el.secret);
+        })
+        console.log(usersSecrets);
+        res.render("secrets", {usersSecrets: usersSecrets});
     } else {
         res.redirect("/login");
     }
