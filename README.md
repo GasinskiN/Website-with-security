@@ -8,6 +8,7 @@ Second level - encryption (better but still bad)
 third level - hashing algorithm sha 512 (pretty good but it is a fast algorithm so a dictionary attack is pretty easy)
 fourth level - hashing algorithm bcrypt (good security a slow hashing algorithm not as susceptible to dictionary attacks)
 fifth level - authorization with passport keeping authorization cookies such things (also good security more of a industry standard)
+Sixth level - OAuth 2.0 with google
 
 current node modules: express, ejs, mongoose, express-session, passport, passport-local-mongoose, passport-google-oauth20
 
