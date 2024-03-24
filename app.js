@@ -164,6 +164,25 @@ app.get("/secrets", async function(req, res){
     }
 });
 
+app.route("/bridge/:bridgeID")
+
+.get(async function(req, res){
+    if (req.isAuthenticated()){
+        
+    }
+})
+.post(async function(req, res){
+    if (req.isAuthenticated()){
+
+    }
+})
+
+.put(async function(req, res){
+    if (req.isAuthenticated()){
+
+    }
+})
+
 // Turn on the server on port 3000
 app.listen(3000, function(){
     console.log("Server running on port 3000");
